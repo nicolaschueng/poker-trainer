@@ -836,8 +836,186 @@ body {
 /* ---- PORTRAIT LOCK OVERLAY (hidden — portrait is now supported) ---- */
 #portrait-overlay { display: none !important; }
 
-/* ---- FORCE LANDSCAPE: rotate page when in portrait mode ---- */
-@media screen and (orientation: portrait) {
+/* ---- PORTRAIT MODE: proper vertical layout for mobile phones ---- */
+@media screen and (orientation: portrait) and (max-width: 500px) {
+  html {
+    /* Remove rotation - use native portrait layout */
+    transform: none !important;
+    width: 100vw !important;
+    height: 100vh !important;
+    position: static !important;
+    top: auto !important;
+    left: auto !important;
+    overflow-x: hidden;
+    overflow-y: hidden;
+  }
+  body {
+    overflow: hidden;
+    height: 100vh;
+    height: 100dvh;
+  }
+
+  /* Hide stats panel and coach toggle in portrait */
+  #stats-panel { display: none !important; }
+  #coach-toggle-btn { display: none !important; }
+
+  /* App becomes vertical flex */
+  #app {
+    flex-direction: column !important;
+    height: 100vh;
+    height: 100dvh;
+    overflow: hidden;
+  }
+
+  /* Main area: compact, no flex-grow */
+  #main-area {
+    flex: 0 0 auto !important;
+    padding: 4px !important;
+    gap: 4px !important;
+    overflow: visible !important;
+    max-height: none !important;
+  }
+
+  /* Table: compact, fits portrait width */
+  #table-container {
+    width: 100% !important;
+    max-width: 100% !important;
+    height: 180px !important;
+    min-height: 140px !important;
+    flex-shrink: 1;
+  }
+  #poker-table {
+    width: 92% !important;
+    height: 90% !important;
+  }
+  #table-container::before {
+    width: min(calc(92% + 20px), 100%) !important;
+    height: min(calc(90% + 20px), 100%) !important;
+  }
+  .table-felt-line {
+    width: calc(92% - 30px) !important;
+    height: calc(90% - 30px) !important;
+  }
+
+  /* Seats: smaller */
+  .seat-info { padding: 1px 4px !important; min-width: 50px !important; border-radius: 5px !important; }
+  .seat-name { font-size: 8px !important; }
+  .seat-name span { font-size: 7px !important; }
+  .seat-chips { font-size: 9px !important; }
+  .seat-bet { font-size: 8px !important; }
+  .card { width: 28px !important; height: 40px !important; font-size: 10px !important; border-radius: 4px !important; }
+  .card.small { width: 22px !important; height: 32px !important; font-size: 8px !important; }
+  .card-suit { font-size: 9px !important; }
+  .dealer-btn { width: 14px !important; height: 14px !important; font-size: 6px !important; }
+
+  /* Community cards & pot: compact */
+  #community-cards { gap: 3px !important; }
+  #pot-display .pot-amount { font-size: 13px !important; }
+  #pot-display .pot-label { font-size: 9px !important; }
+  #street-display { font-size: 9px !important; }
+
+  /* Coach panel: FULL WIDTH, take remaining space */
+  #coach-panel {
+    position: relative !important;
+    transform: none !important;
+    width: 100% !important;
+    min-width: 100% !important;
+    max-width: 100% !important;
+    flex: 1 1 0 !important;
+    min-height: 0 !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    border-left: none !important;
+    border-top: 1px solid var(--border-dim) !important;
+    padding: 8px !important;
+    box-sizing: border-box !important;
+    z-index: auto !important;
+    gap: 6px !important;
+    margin-bottom: 56px !important; /* space for fixed action bar */
+  }
+  #coach-panel.drawer-open {
+    transform: none !important;
+  }
+
+  /* Coach panel content: optimized for readability */
+  #coach-panel h2 {
+    font-size: 12px !important;
+    padding-bottom: 4px !important;
+    margin: 0 !important;
+  }
+  .coach-box {
+    padding: 6px 8px !important;
+    border-radius: 8px !important;
+  }
+  .coach-box h4 {
+    font-size: 10px !important;
+    margin-bottom: 4px !important;
+    padding-bottom: 3px !important;
+  }
+  .equity-pct {
+    font-size: 18px !important;
+  }
+  .equity-bar-bg {
+    height: 10px !important;
+    margin-bottom: 2px !important;
+  }
+  .coach-advice {
+    font-size: 14px !important;
+    line-height: 1.5 !important;
+    word-wrap: break-word !important;
+    overflow-wrap: break-word !important;
+  }
+  .ev-row { padding: 3px 0 !important; }
+  .ev-action { font-size: 12px !important; }
+  .ev-value { font-size: 12px !important; }
+  .pos-box { font-size: 12px !important; line-height: 1.5 !important; }
+  .opp-row { font-size: 11px !important; }
+  #opp-analysis { font-size: 12px !important; line-height: 1.5 !important; }
+
+  /* Action bar: fixed at bottom */
+  #action-bar {
+    position: fixed !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    z-index: 100 !important;
+    max-height: 56px !important;
+    padding: 6px 8px !important;
+    margin: 0 !important;
+    border-radius: 0 !important;
+    background: var(--bg-panel) !important;
+    border-top: 1px solid var(--border-dim) !important;
+    box-sizing: border-box !important;
+  }
+  #action-bar h3 { font-size: 0 !important; height: 0 !important; margin: 0 !important; padding: 0 !important; overflow: hidden !important; }
+  #action-buttons {
+    gap: 4px !important;
+    flex-wrap: nowrap !important;
+    overflow-x: auto !important;
+  }
+  .action-btn {
+    padding: 8px 12px !important;
+    font-size: 12px !important;
+    font-weight: bold !important;
+    min-width: 52px !important;
+    min-height: 36px !important;
+    flex-shrink: 0 !important;
+    border-radius: 6px !important;
+  }
+  #raise-controls {
+    gap: 4px !important;
+    flex-wrap: nowrap !important;
+  }
+  #raise-slider { width: 80px !important; height: 24px !important; }
+  #raise-amount-display { font-size: 11px !important; min-width: 40px !important; }
+  .raise-preset { padding: 4px 6px !important; font-size: 9px !important; min-height: 28px !important; }
+  #action-msg { font-size: 9px !important; margin-top: 2px !important; }
+  #game-log { display: none !important; }
+  #overlay-card button { padding: 10px 20px !important; font-size: 13px !important; }
+}
+
+/* ---- FORCE LANDSCAPE: rotate page when in portrait on larger screens ---- */
+@media screen and (orientation: portrait) and (min-width: 501px) {
   html {
     transform: rotate(-90deg);
     transform-origin: left top;
@@ -1007,6 +1185,9 @@ body {
 <body>
 
 <!-- portrait layout removed: CSS rotation handles mobile landscape -->
+
+<!-- COACH DRAWER TOGGLE (landscape mobile only) -->
+<button id="coach-toggle-btn" onclick="toggleCoachDrawer()" aria-label="AI教练">AI教练</button>
 
 <div id="app">
   <!-- LEFT: STATS PANEL -->
@@ -2364,15 +2545,6 @@ function showSkipToEndButton() {
   }
   document.getElementById('action-title').textContent = '你已弃牌';
   document.getElementById('action-msg').textContent = '点击"跳到结局"查看所有人的手牌和最终结果';
-  // Portrait action area
-  if (isPortraitMobile()) {
-    const pmBtns = document.getElementById('pm-action-buttons');
-    if (pmBtns) pmBtns.innerHTML = '<button class="action-btn btn-skip-end btn-new-fullwidth" onclick="skipToEnd()">⏭ 跳到结局</button>';
-    const pmTitle = document.getElementById('pm-action-title');
-    if (pmTitle) pmTitle.textContent = '你已弃牌';
-    const pmMsg = document.getElementById('pm-action-msg');
-    if (pmMsg) pmMsg.textContent = '点击"跳到结局"查看最终结果';
-  }
 }
 
 function skipToEnd() {
@@ -2750,8 +2922,6 @@ function updateCoach() {
   updatePositionAnalysis(human);
   // Opponent analysis
   updateOpponentAnalysis();
-  // 同步竖屏教练数据
-  updatePortraitCoach();
 }
 
 function generateAdvice(equity, equityPct, canCheck, callAmt, pot, human, handInfo) {
@@ -3123,7 +3293,6 @@ function renderAll() {
   renderStreet();
   renderDealerBtn();
   updateStatsPanel();
-  renderPortraitLayout();
 }
 
 function renderSeats() {
@@ -3274,8 +3443,6 @@ function showHumanActions() {
   document.getElementById('action-msg').textContent = canCheck ?
     '当前无需跟注，可选择看牌或下注' :
     `需跟注 ${callAmt} | 底池 ${G.pot} | 最小加注 ${G.minRaise}`;
-  // 同步竖屏操作栏
-  showPortraitActions();
 }
 
 function hideHumanActions() {
@@ -3289,20 +3456,6 @@ function hideHumanActions() {
   document.getElementById('raise-controls').style.display = 'none';
   document.getElementById('action-title').textContent = '等待...';
   document.getElementById('action-msg').textContent = '';
-  // 竖屏：重置操作栏
-  if (isPortraitMobile()) {
-    const pmBtns = document.getElementById('pm-action-buttons');
-    if (pmBtns) {
-      if (!G.running) {
-        pmBtns.innerHTML = '<button class="action-btn btn-new-fullwidth" onclick="startNewHand()">▶ 新一局</button>';
-      } else {
-        pmBtns.innerHTML = '';
-      }
-    }
-    document.getElementById('pm-raise-controls').classList.remove('show');
-    document.getElementById('pm-action-title').textContent = '等待...';
-    document.getElementById('pm-action-msg').textContent = '';
-  }
 }
 
 function updateRaiseAmount() {
@@ -4047,14 +4200,13 @@ function init() {
   const pmTitle = document.getElementById('pm-action-title');
   if (pmTitle) pmTitle.textContent = '点击"新一局"开始游戏';
   logMsg('欢迎来到德州扑克训练器！');
-  logMsg('9人桌 | 盲注 50/100 | 初始筹码 10000');
   logMsg('右侧教练面板会实时提供建议。');
   updateCoach();
 }
 
 // ============ 移动端横屏检测 & 教练抽屉 ============
 function checkOrientation() {
-  // Portrait is now fully supported — no overlay needed
+  try { screen.orientation.lock('landscape').catch(()=>{}); } catch(e) {}
 }
 
 function toggleCoachDrawer() {
@@ -4081,395 +4233,6 @@ document.addEventListener('click', function(e) {
 window.addEventListener('orientationchange', checkOrientation);
 window.addEventListener('resize', checkOrientation);
 
-// ============================================================
-//  竖屏专属渲染函数
-// ============================================================
-
-// 判断当前是否为竖屏手机模式
-function isPortraitMobile() {
-  return window.matchMedia('(max-width: 768px) and (orientation: portrait)').matches;
-}
-
-// 主渲染入口：更新竖屏布局所有区域
-function renderPortraitLayout() {
-  if (!isPortraitMobile()) return;
-  renderPortraitTopbar();
-  renderPortraitOpponents();
-  renderPortraitBoard();
-  renderPortraitMyHand();
-}
-
-// A. 顶栏
-function renderPortraitTopbar() {
-  const human = G.players[HUMAN_SEAT];
-  if (!human) return;
-  document.getElementById('pm-hands').textContent = G.handNumber;
-  document.getElementById('pm-pot').textContent = G.pot || 0;
-  const chips = human.chips >= 0 ? human.chips : 0;
-  const chipsEl = document.getElementById('pm-chips');
-  chipsEl.textContent = chips;
-  chipsEl.className = 'pm-topbar-value ' + (chips >= STARTING_CHIPS ? 'green' : 'red');
-  // 我的位置
-  const posEl = document.getElementById('pm-my-position');
-  if (posEl) {
-    const pos = human.position || '--';
-    posEl.textContent = pos;
-    // BTN/CO 高亮金色; SB/BB 蓝色; 其他默认
-    const isBtn = pos === 'BTN';
-    const isCO = pos === 'CO';
-    posEl.className = 'pm-topbar-value pm-pos-badge';
-  }
-}
-
-// B. 对手区（8个AI对手）
-function renderPortraitOpponents() {
-  const grid = document.getElementById('pm-opponents-grid');
-  if (!grid) return;
-  grid.innerHTML = '';
-  const playerEmojis = ['😎','🎩','👩','👴','🧊','🤠','🌸','👑'];
-  for (let i = 1; i <= 8; i++) {
-    const p = G.players[i];
-    if (!p) continue;
-    const isActive = G.running && G.currentPlayer === i;
-    const isDealer = i === G.dealerPos;
-    let cardClass = 'pm-opp-card';
-    if (isActive) cardClass += ' active';
-    if (p.folded) cardClass += ' folded';
-    if (isDealer) cardClass += ' dealer-mark';
-
-    // 最近行动标签
-    let actionLabel = '';
-    let actionClass = 'pm-opp-action';
-    if (p.folded && G.running) {
-      actionLabel = '弃牌'; actionClass += ' act-fold';
-    } else if (p.allin) {
-      actionLabel = 'ALL-IN'; actionClass += ' act-allin';
-    } else if (p.bet > 0) {
-      // 判断是跟注还是加注
-      if (p.bet === G.currentBet && !isActive) {
-        actionLabel = '跟注'; actionClass += ' act-call';
-      } else if (p.bet > 0) {
-        actionLabel = p.bet; actionClass += ' act-bet';
-      }
-    } else if (isActive && !G.waitingForHuman) {
-      actionLabel = '思考中...'; actionClass += ' act-check';
-    }
-    // 盲注标记
-    if (G.running && p.bet > 0 && !G.flop && actionLabel === p.bet) {
-      if (i === (G.dealerPos + 1) % 9) { actionLabel = '小盲 ' + p.bet; actionClass = 'pm-opp-action act-blind'; }
-      else if (i === (G.dealerPos + 2) % 9) { actionLabel = '大盲 ' + p.bet; actionClass = 'pm-opp-action act-blind'; }
-    }
-
-    const emoji = playerEmojis[(i - 1) % playerEmojis.length];
-
-    // Showdown: show opponent cards if hand is over
-    let showdownCardsHTML = '';
-    if (!G.running && p.cards && p.cards.length >= 2) {
-      const c0 = p.cards[0], c1 = p.cards[1];
-      const r0 = (c0.suit === '♥' || c0.suit === '♦') ? 'red' : '';
-      const r1 = (c1.suit === '♥' || c1.suit === '♦') ? 'red' : '';
-      const opacity = p.folded ? ' style="opacity:0.45"' : '';
-      showdownCardsHTML = `<div class="pm-opp-showdown-cards"${opacity}>
-        <div class="pm-card ${r0}">${c0.rank}${c0.suit}</div>
-        <div class="pm-card ${r1}">${c1.rank}${c1.suit}</div>
-      </div>`;
-    }
-
-    // In review mode, make card clickable to open review panel
-    if (!G.running || reviewMode) {
-      cardClass += ' review-clickable';
-    }
-
-    const card = document.createElement('div');
-    card.className = cardClass;
-    const posLabel = p.position ? `<div class="pm-opp-pos">${p.position}</div>` : '';
-    card.innerHTML = `
-      <div class="pm-opp-emoji">${emoji}</div>
-      <div class="pm-opp-name">${p.name}${p.rebuys > 0 ? `<span style="color:#e85555;font-size:0.75em;font-weight:normal">(-${p.rebuys})</span>` : ''}</div>
-      ${posLabel}
-      <div class="pm-opp-chips">${p.chips >= 0 ? p.chips : 0}</div>
-      ${actionLabel ? `<div class="${actionClass}">${actionLabel}</div>` : '<div class="pm-opp-action"></div>'}
-      ${showdownCardsHTML}
-    `;
-    if (!G.running || reviewMode) {
-      card.onclick = () => openReviewPanel(i);
-    }
-    grid.appendChild(card);
-  }
-}
-
-// C. 公共牌+底池
-function renderPortraitBoard() {
-  // 底池
-  const pot2 = document.getElementById('pm-pot2');
-  if (pot2) pot2.textContent = G.pot || 0;
-  // 公共牌
-  const container = document.getElementById('pm-community');
-  if (!container) return;
-  container.innerHTML = '';
-  for (let i = 0; i < 5; i++) {
-    const c = G.communityCards[i];
-    container.innerHTML += c ? cardHTML(c) : `<div class="card ghost"></div>`;
-  }
-  // 街道标签
-  const names = { preflop: '翻牌前', flop: '翻牌', turn: '转牌', river: '河牌' };
-  const sl = document.getElementById('pm-street-label');
-  if (sl) sl.textContent = G.running ? (names[G.street] || '') : '';
-}
-
-// D. 我的手牌
-function renderPortraitMyHand() {
-  const human = G.players[HUMAN_SEAT];
-  const container = document.getElementById('pm-myhand-cards');
-  if (!container) return;
-  container.innerHTML = '';
-  if (human && human.cards.length >= 2) {
-    container.innerHTML = cardHTML(human.cards[0]) + cardHTML(human.cards[1]);
-  } else {
-    container.innerHTML = `<div class="card ghost"></div><div class="card ghost"></div>`;
-  }
-  // 更新我的手牌标签（含rebuy次数）
-  const labelEl = document.getElementById('pm-myhand-label');
-  if (labelEl && human) {
-    labelEl.innerHTML = `我的手牌${human.rebuys > 0 ? `<span style="color:#e85555;font-size:0.75em;font-weight:normal;margin-left:3px">(-${human.rebuys})</span>` : ''}`;
-  }
-  // 手牌强度提示
-  const strengthEl = document.getElementById('pm-hand-strength');
-  if (strengthEl && human && human.cards.length >= 2 && G.running) {
-    const h = getBestHand(human.cards, G.communityCards);
-    strengthEl.textContent = h && h.name !== '--' ? h.name : '';
-  } else if (strengthEl) {
-    strengthEl.textContent = '';
-  }
-  // 位置徽章
-  const posBadge = document.getElementById('pm-myhand-pos-badge');
-  if (posBadge) {
-    const pos = human && human.position ? human.position : '';
-    if (pos && G.running) {
-      posBadge.textContent = pos;
-      posBadge.className = 'show';
-    } else {
-      posBadge.className = '';
-    }
-  }
-}
-
-// 更新竖屏操作栏
-function showPortraitActions() {
-  if (!isPortraitMobile()) return;
-  const human = G.players[HUMAN_SEAT];
-  const callAmt = Math.min(G.currentBet - human.bet, human.chips);
-  const canCheck = G.currentBet === human.bet;
-  const canRaise = human.chips > callAmt;
-
-  document.getElementById('pm-action-title').textContent =
-    `轮到你行动 | ${G.street === 'preflop' ? '翻牌前' : G.street === 'flop' ? '翻牌' : G.street === 'turn' ? '转牌' : '河牌'}`;
-
-  const btns = document.getElementById('pm-action-buttons');
-  btns.innerHTML = '';
-
-  // Fold
-  const foldBtn = document.createElement('button');
-  foldBtn.className = 'action-btn btn-fold';
-  foldBtn.textContent = '弃牌';
-  foldBtn.onclick = () => humanAction('fold');
-  btns.appendChild(foldBtn);
-
-  // Check/Call
-  if (canCheck) {
-    const checkBtn = document.createElement('button');
-    checkBtn.className = 'action-btn btn-check';
-    checkBtn.textContent = '看牌';
-    checkBtn.onclick = () => humanAction('check');
-    btns.appendChild(checkBtn);
-  } else {
-    const callBtn = document.createElement('button');
-    callBtn.className = 'action-btn btn-call';
-    callBtn.textContent = `跟注 ${callAmt}`;
-    callBtn.onclick = () => humanAction('call');
-    btns.appendChild(callBtn);
-  }
-
-  // Raise
-  if (canRaise) {
-    const raiseBtn = document.createElement('button');
-    raiseBtn.className = 'action-btn btn-raise';
-    raiseBtn.textContent = '加注';
-    raiseBtn.onclick = () => {
-      // 展开加注控件
-      const rc = document.getElementById('pm-raise-controls');
-      const isOpen = rc.classList.toggle('show');
-      raiseBtn.textContent = isOpen ? '取消' : '加注';
-      if (isOpen) initPortraitRaiseSlider();
-    };
-    btns.appendChild(raiseBtn);
-  }
-
-  // All-in
-  const allInBtn = document.createElement('button');
-  allInBtn.className = 'action-btn btn-allin';
-  allInBtn.textContent = '全下';
-  allInBtn.onclick = () => humanAction('allin');
-  btns.appendChild(allInBtn);
-
-  // 隐藏加注控件
-  document.getElementById('pm-raise-controls').classList.remove('show');
-  document.getElementById('pm-action-msg').textContent = '';
-}
-
-function initPortraitRaiseSlider() {
-  const human = G.players[HUMAN_SEAT];
-  const minRaise = Math.max(G.currentBet + G.minRaise, G.currentBet * 2);
-  const maxRaise = human.chips + human.bet;
-  const slider = document.getElementById('pm-raise-slider');
-  slider.min = minRaise;
-  slider.max = maxRaise;
-  if (G.recommendedRaise >= minRaise && G.recommendedRaise <= maxRaise) {
-    G.raiseAmount = G.recommendedRaise;
-  } else {
-    G.raiseAmount = Math.min(minRaise + Math.floor((maxRaise - minRaise) * 0.5), maxRaise);
-  }
-  slider.value = G.raiseAmount;
-  document.getElementById('pm-raise-amount').textContent = G.raiseAmount;
-  updatePortraitRaiseSliderStyle();
-}
-
-function updatePortraitRaiseAmount() {
-  const slider = document.getElementById('pm-raise-slider');
-  G.raiseAmount = parseInt(slider.value);
-  document.getElementById('pm-raise-amount').textContent = G.raiseAmount;
-  updatePortraitRaiseSliderStyle();
-  // 同步主滑块
-  const mainSlider = document.getElementById('raise-slider');
-  if (mainSlider) {
-    mainSlider.value = G.raiseAmount;
-    document.getElementById('raise-amount-display').textContent = G.raiseAmount;
-  }
-}
-
-function updatePortraitRaiseSliderStyle() {
-  const slider = document.getElementById('pm-raise-slider');
-  const min = parseInt(slider.min), max = parseInt(slider.max), val = parseInt(slider.value);
-  const pct = ((val - min) / (max - min) * 100).toFixed(1) + '%';
-  slider.style.setProperty('--val', pct);
-  slider.style.background = `linear-gradient(90deg, var(--gold) ${pct}, var(--border-dim) ${pct})`;
-}
-
-function setPortraitRaisePreset(mult) {
-  const human = G.players[HUMAN_SEAT];
-  const pot = G.pot;
-  const minRaise = Math.max(G.currentBet + G.minRaise, G.currentBet * 2);
-  const maxRaise = human.chips + human.bet;
-  let target = Math.round(pot * mult);
-  target = Math.max(minRaise, Math.min(target, maxRaise));
-  G.raiseAmount = target;
-  const slider = document.getElementById('pm-raise-slider');
-  slider.value = target;
-  document.getElementById('pm-raise-amount').textContent = target;
-  updatePortraitRaiseSliderStyle();
-  const mainSlider = document.getElementById('raise-slider');
-  if (mainSlider) {
-    mainSlider.value = target;
-    document.getElementById('raise-amount-display').textContent = target;
-  }
-}
-
-// 更新竖屏教练信息（由 updateCoach() 调用后触发）
-function updatePortraitCoach() {
-  if (!isPortraitMobile()) return;
-  const human = G.players[HUMAN_SEAT];
-  if (!G.running || !human || human.folded) {
-    document.getElementById('pm-coach-inline-equity-badge').textContent = '--';
-    document.getElementById('pm-inline-equity-pct').textContent = '--';
-    document.getElementById('pm-inline-equity-bar-fill').style.width = '0%';
-    document.getElementById('pm-inline-advice').innerHTML = human && human.folded ? '你已弃牌' : '等待游戏开始...';
-    // Keep old sheet elements synced too (hidden but referenced by old code)
-    if (document.getElementById('pm-sheet-equity-pct')) document.getElementById('pm-sheet-equity-pct').textContent = '--';
-    return;
-  }
-  // 从主面板同步数据
-  const equityText = document.getElementById('coach-equity').textContent;
-  const equityPct = parseInt(equityText) || 0;
-  const adviceHTML = document.getElementById('coach-advice').innerHTML;
-  const posHTML = document.getElementById('pos-analysis').innerHTML;
-  const evFold = document.getElementById('ev-fold').textContent;
-  const evCall = document.getElementById('ev-call').textContent;
-  const evRaise = document.getElementById('ev-raise').textContent;
-  const evFoldClass = document.getElementById('ev-fold').className;
-  const evCallClass = document.getElementById('ev-call').className;
-  const evRaiseClass = document.getElementById('ev-raise').className;
-
-  // 内嵌教练区：badge
-  const badge = document.getElementById('pm-coach-inline-equity-badge');
-  badge.textContent = equityPct + '%';
-  badge.style.color = equityPct > 50 ? 'var(--green-win)' : equityPct > 30 ? 'var(--gold-bright)' : 'var(--red-lose)';
-
-  // 胜率
-  const eqPctEl = document.getElementById('pm-inline-equity-pct');
-  eqPctEl.textContent = equityPct + '%';
-  eqPctEl.style.color = equityPct > 50 ? 'var(--green-win)' : equityPct > 30 ? 'var(--gold-bright)' : 'var(--red-lose)';
-
-  const fill = document.getElementById('pm-inline-equity-bar-fill');
-  fill.style.width = equityPct + '%';
-  fill.style.background = equityPct > 50
-    ? 'linear-gradient(90deg,#2e7d32,#81c784)'
-    : equityPct > 30 ? 'linear-gradient(90deg,#e65100,#ffb74d)'
-    : 'linear-gradient(90deg,#b71c1c,#e57373)';
-
-  // EV
-  document.getElementById('pm-ev-fold2').textContent = evFold;
-  document.getElementById('pm-ev-fold2').className = evFoldClass;
-  document.getElementById('pm-ev-call2').textContent = evCall;
-  document.getElementById('pm-ev-call2').className = evCallClass;
-  document.getElementById('pm-ev-raise2').textContent = evRaise;
-  document.getElementById('pm-ev-raise2').className = evRaiseClass;
-
-  // 建议 & 位置
-  document.getElementById('pm-inline-advice').innerHTML = adviceHTML;
-  document.getElementById('pm-inline-pos').innerHTML = posHTML;
-
-  // 旧 sheet 元素兼容（已隐藏）
-  if (document.getElementById('pm-sheet-equity-pct')) {
-    document.getElementById('pm-sheet-equity-pct').textContent = equityPct + '%';
-    document.getElementById('pm-sheet-equity-bar-fill').style.width = equityPct + '%';
-    document.getElementById('pm-sheet-advice').innerHTML = adviceHTML;
-    document.getElementById('pm-sheet-pos').innerHTML = posHTML;
-    document.getElementById('pm-ev-fold').textContent = evFold;
-    document.getElementById('pm-ev-call').textContent = evCall;
-    document.getElementById('pm-ev-raise').textContent = evRaise;
-  }
-}
-
-// 展开/收起教练Sheet（旧功能，sheet已隐藏，保留以防兼容性调用）
-function togglePortraitSheet() {
-  const sheet = document.getElementById('pm-coach-sheet');
-  const overlay = document.getElementById('pm-sheet-overlay');
-  const icon = document.getElementById('pm-coach-expand-icon');
-  if (!sheet) return;
-  const isOpen = sheet.classList.toggle('open');
-  if (overlay) overlay.classList.toggle('show', isOpen);
-  if (icon) icon.classList.toggle('open', isOpen);
-}
-
-function closePortraitSheet() {
-  const sheet = document.getElementById('pm-coach-sheet');
-  const overlay = document.getElementById('pm-sheet-overlay');
-  const icon = document.getElementById('pm-coach-expand-icon');
-  if (sheet) sheet.classList.remove('open');
-  if (overlay) overlay.classList.remove('show');
-  if (icon) icon.classList.remove('open');
-}
-
-// 竖屏显示等待/结束状态
-function setPortraitActionTitle(text) {
-  const el = document.getElementById('pm-action-title');
-  if (el) el.textContent = text;
-}
-
-function setPortraitActionMsg(text) {
-  const el = document.getElementById('pm-action-msg');
-  if (el) el.textContent = text;
-}
 
 window.addEventListener('load', init);
 window.addEventListener('load', checkOrientation);
