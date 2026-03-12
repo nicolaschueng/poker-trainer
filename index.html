@@ -427,6 +427,16 @@ body {
 }
 .btn-fold:hover  { box-shadow: 0 6px 20px rgba(200,30,30,0.6); }
 
+.btn-skip-end {
+  background: linear-gradient(160deg, #1565c0, #0d47a1);
+  color: #fff;
+  box-shadow: 0 3px 14px rgba(21,101,192,0.55);
+  font-size: 1.05em;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+}
+.btn-skip-end:hover { box-shadow: 0 6px 22px rgba(21,101,192,0.75); }
+
 .btn-check {
   background: linear-gradient(160deg, #3a5070, #243448);
   color: #c8d8f0;
@@ -3216,6 +3226,7 @@ let G = {
 
 let actionLog = [];    // 每手牌的行动记录
 let reviewMode = false; // 手牌结束后是否处于复盘模式
+let skipMode = false;  // 弃牌后"跳到结局"快速模式
 
 // ---- Timer management to prevent freeze/leak across hands ----
 let activeTimers = [];
@@ -3235,6 +3246,7 @@ function clearAllTimers() {
 function resetHandState() {
   actionLog = [];
   reviewMode = false;
+  skipMode = false;
   G.deck = shuffleDeck(createDeck());
   G.communityCards = [];
   G.pot = 0;
@@ -3385,6 +3397,115 @@ function needsToAct(p) {
   return false;
 }
 
+function showSkipToEndButton() {
+  // Desktop action area
+  const btns = document.getElementById('action-buttons');
+  if (btns) {
+    btns.innerHTML = '<button class="action-btn btn-skip-end" onclick="skipToEnd()">⏭ 跳到结局</button>';
+  }
+  document.getElementById('action-title').textContent = '你已弃牌';
+  document.getElementById('action-msg').textContent = '点击"跳到结局"查看所有人的手牌和最终结果';
+  // Portrait action area
+  if (isPortraitMobile()) {
+    const pmBtns = document.getElementById('pm-action-buttons');
+    if (pmBtns) pmBtns.innerHTML = '<button class="action-btn btn-skip-end btn-new-fullwidth" onclick="skipToEnd()">⏭ 跳到结局</button>';
+    const pmTitle = document.getElementById('pm-action-title');
+    if (pmTitle) pmTitle.textContent = '你已弃牌';
+    const pmMsg = document.getElementById('pm-action-msg');
+    if (pmMsg) pmMsg.textContent = '点击"跳到结局"查看最终结果';
+  }
+}
+
+function skipToEnd() {
+  if (!G.running) return;
+  skipMode = true;
+  // Clear all pending AI timeouts
+  clearAllTimers();
+  // Hide the skip button
+  const btns = document.getElementById('action-buttons');
+  if (btns) btns.innerHTML = '';
+  const pmBtns = document.getElementById('pm-action-buttons');
+  if (pmBtns) pmBtns.innerHTML = '';
+  G.waitingForHuman = false;
+  // Run all remaining AI actions immediately (synchronously) until hand ends
+  runRemainingActionsSync();
+}
+
+function runRemainingActionsSync() {
+  // Keep advancing until hand ends
+  const MAX_ITER = 200;
+  let iter = 0;
+  while (G.running && iter < MAX_ITER) {
+    iter++;
+    const totalActive = G.players.filter(p => !p.folded);
+    if (totalActive.length === 1) { endHand(); return; }
+    if (isBettingDone()) {
+      // Advance street synchronously
+      for (const p of G.players) { p.bet = 0; p.acted = false; }
+      G.currentBet = 0;
+      G.minRaise = BB_AMOUNT;
+      G.lastRaiser = -1;
+      if (G.street === 'preflop') {
+        G.street = 'flop';
+        G.communityCards.push(G.deck.pop(), G.deck.pop(), G.deck.pop());
+        logMsg(`--- Flop: ${G.communityCards.map(c=>c.rank+c.suit).join(' ')} ---`);
+      } else if (G.street === 'flop') {
+        G.street = 'turn';
+        G.communityCards.push(G.deck.pop());
+        logMsg(`--- Turn: ${G.communityCards[3].rank+G.communityCards[3].suit} ---`);
+      } else if (G.street === 'turn') {
+        G.street = 'river';
+        G.communityCards.push(G.deck.pop());
+        logMsg(`--- River: ${G.communityCards[4].rank+G.communityCards[4].suit} ---`);
+      } else if (G.street === 'river') {
+        endHand(); return;
+      }
+      // Reset first-to-act for new street
+      G.currentPlayer = (G.dealerPos + 1) % 9;
+      let safetyCount = 0;
+      while ((G.players[G.currentPlayer].folded || G.players[G.currentPlayer].allin) && safetyCount < 9) {
+        G.currentPlayer = (G.currentPlayer + 1) % 9;
+        safetyCount++;
+      }
+      if (G.players.filter(p => !p.folded && !p.allin).length === 0) { endHand(); return; }
+      continue;
+    }
+    // Find next player to act
+    let acted = false;
+    for (let i = 0; i < 9; i++) {
+      const seatIdx = (G.currentPlayer + i) % 9;
+      const p = G.players[seatIdx];
+      if (p.folded || p.allin) continue;
+      if (!needsToAct(p)) continue;
+      G.currentPlayer = seatIdx;
+      if (p.isHuman) {
+        // Human already folded — skip
+        G.currentPlayer = (seatIdx + 1) % 9;
+        acted = true;
+        break;
+      }
+      // AI acts synchronously
+      const gameState = {
+        street: G.street, pot: G.pot, currentBet: G.currentBet,
+        players: G.players, communityCards: G.communityCards, dealerPos: G.dealerPos
+      };
+      const decision = aiDecide(p, gameState);
+      actionLog.push({
+        playerId: p.id, playerName: p.name, styleKey: p.styleKey,
+        street: G.street, action: decision.action, amount: decision.amount || 0,
+        reasoning: decision.reasoning || '', handStrength: Math.round((decision.strength || 0) * 100),
+        pot: G.pot, currentBet: G.currentBet, positionNote: p.position, cards: [...p.cards],
+      });
+      applyAction(seatIdx, decision.action, decision.amount || 0);
+      G.currentPlayer = (seatIdx + 1) % 9;
+      acted = true;
+      break;
+    }
+    if (!acted) { endHand(); return; }
+  }
+  if (G.running) endHand();
+}
+
 function isBettingDone() {
   const active = G.players.filter(p => !p.folded && !p.allin);
   if (active.length === 0) return true;
@@ -3510,6 +3631,9 @@ function humanAction(action) {
   G.currentPlayer = (HUMAN_SEAT + 1) % 9;
   renderAll();
   updateCoach();
+  if (action === 'fold') {
+    showSkipToEndButton();
+  }
   advanceTurn();
 }
 
@@ -4069,8 +4193,12 @@ function renderSeats() {
     if (p.cards.length > 0) {
       if (i === HUMAN_SEAT) {
         cardsHTML += cardHTML(p.cards[0], true) + cardHTML(p.cards[1], true);
-      } else if (p.folded) {
+      } else if (p.folded && G.running) {
         cardsHTML += `<div class="card small ghost"></div><div class="card small ghost"></div>`;
+      } else if (p.folded && !G.running) {
+        // Hand over: show folded player cards with opacity to indicate fold
+        const c0 = p.cards[0], c1 = p.cards[1];
+        cardsHTML += `<div style="opacity:0.45">${cardHTML(c0, true)}</div><div style="opacity:0.45">${cardHTML(c1, true)}</div>`;
       } else if (G.running) {
         cardsHTML += cardHTML(null, true, true) + cardHTML(null, true, true);
       } else {
@@ -5075,13 +5203,14 @@ function renderPortraitOpponents() {
 
     const emoji = playerEmojis[(i - 1) % playerEmojis.length];
 
-    // Showdown: show opponent cards if hand is over and they didn't fold
+    // Showdown: show opponent cards if hand is over
     let showdownCardsHTML = '';
-    if (!G.running && !p.folded && p.cards && p.cards.length >= 2) {
+    if (!G.running && p.cards && p.cards.length >= 2) {
       const c0 = p.cards[0], c1 = p.cards[1];
       const r0 = (c0.suit === '♥' || c0.suit === '♦') ? 'red' : '';
       const r1 = (c1.suit === '♥' || c1.suit === '♦') ? 'red' : '';
-      showdownCardsHTML = `<div class="pm-opp-showdown-cards">
+      const opacity = p.folded ? ' style="opacity:0.45"' : '';
+      showdownCardsHTML = `<div class="pm-opp-showdown-cards"${opacity}>
         <div class="pm-card ${r0}">${c0.rank}${c0.suit}</div>
         <div class="pm-card ${r1}">${c1.rank}${c1.suit}</div>
       </div>`;
