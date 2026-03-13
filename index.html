@@ -833,21 +833,51 @@ body {
    MOBILE RESPONSIVE — landscape/touch support
    ============================================================ */
 
-/* ---- PORTRAIT LOCK OVERLAY (disabled) ---- */
-#portrait-overlay { display: none !important; }
-
-/* ---- FORCE LANDSCAPE: rotate entire page when in portrait mode ---- */
-@media screen and (orientation: portrait) {
-  html {
-    transform: rotate(-90deg);
-    transform-origin: left top;
-    width: 100vh;
-    height: 100vw;
-    overflow-x: hidden;
-    position: absolute;
-    top: 100%;
-    left: 0;
-  }
+/* ---- PORTRAIT OVERLAY ---- */
+#portrait-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: rgba(10, 10, 26, 0.97);
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  text-align: center;
+  padding: 24px;
+}
+#portrait-overlay.visible { display: flex; }
+#portrait-overlay .rotate-icon {
+  font-size: 56px;
+  animation: rotateHint 2s ease-in-out infinite;
+}
+@keyframes rotateHint {
+  0%, 100% { transform: rotate(0deg); }
+  40% { transform: rotate(-90deg); }
+  60% { transform: rotate(-90deg); }
+}
+#portrait-overlay p {
+  font-size: 18px;
+  color: var(--gold-bright);
+  font-weight: 600;
+  line-height: 1.5;
+}
+#portrait-overlay small {
+  font-size: 13px;
+  color: var(--text-muted);
+}
+#portrait-overlay button {
+  background: var(--bg-card);
+  color: var(--text-muted);
+  border: 1px solid var(--border-mid);
+  border-radius: 8px;
+  padding: 12px 22px;
+  font-size: 14px;
+  cursor: pointer;
+  touch-action: manipulation;
+  min-height: 44px;
+  margin-top: 8px;
 }
 
 /* ---- COACH DRAWER TOGGLE BUTTON (mobile only) ---- */
@@ -1006,7 +1036,13 @@ body {
 </head>
 <body>
 
-<!-- portrait layout removed: CSS rotation handles mobile landscape -->
+<!-- PORTRAIT OVERLAY -->
+<div id="portrait-overlay">
+  <div class="rotate-icon">📱</div>
+  <p>请横屏使用</p>
+  <small>为获得最佳体验，请将手机旋转至横屏</small>
+  <button onclick="dismissPortraitOverlay()">继续使用竖屏</button>
+</div>
 
 <!-- COACH DRAWER TOGGLE (landscape mobile only) -->
 <button id="coach-toggle-btn" onclick="toggleCoachDrawer()" aria-label="AI教练">AI教练</button>
@@ -4021,8 +4057,23 @@ function init() {
 }
 
 // ============ 移动端横屏检测 & 教练抽屉 ============
+let portraitDismissed = false;
+
 function checkOrientation() {
-  try { screen.orientation.lock('landscape').catch(()=>{}); } catch(e) {}
+  const overlay = document.getElementById('portrait-overlay');
+  const isMobile = window.innerWidth <= 1024 || window.innerHeight <= 768;
+  const isPortrait = window.innerHeight > window.innerWidth;
+  if (isMobile && isPortrait && !portraitDismissed) {
+    overlay.classList.add('visible');
+  } else {
+    overlay.classList.remove('visible');
+    portraitDismissed = false; // reset when orientation actually changes
+  }
+}
+
+function dismissPortraitOverlay() {
+  portraitDismissed = true;
+  document.getElementById('portrait-overlay').classList.remove('visible');
 }
 
 function toggleCoachDrawer() {
@@ -4046,7 +4097,7 @@ document.addEventListener('click', function(e) {
   }
 });
 
-window.addEventListener('orientationchange', checkOrientation);
+window.addEventListener('orientationchange', () => { portraitDismissed = false; setTimeout(checkOrientation, 100); });
 window.addEventListener('resize', checkOrientation);
 
 
